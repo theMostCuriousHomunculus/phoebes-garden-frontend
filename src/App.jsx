@@ -4,12 +4,16 @@ import Cookies from 'js-cookie';
 import { makeStyles } from '@material-ui/core/styles';
 
 import LoadingSpinner from './components/miscellaneous/LoadingSpinner';
-import theme from './theme';
+import Navigation from './components/Main Navigation/Navigation';
 import { AuthenticationContext } from './contexts/authentication-context';
 import { useRequest } from './hooks/request-hook';
 
 const Authenticate = React.lazy(() => import('./pages/Authenticate'));
+const Cart = React.lazy(() => import('./pages/Cart'));
 const Home = React.lazy(() => import('./pages/Home'));
+const ManageProduct = React.lazy(() => import('./pages/ManageProduct'));
+const Products = React.lazy(() => import('./pages/Products'));
+const ViewProduct = React.lazy(() => import('./pages/ViewProduct'));
 
 const useStyles = makeStyles({
   main: {
@@ -63,7 +67,7 @@ function App() {
       }}
     >
       <BrowserRouter>
-        {/*<Navigation />*/}
+        <Navigation />
         <main className={classes.main}>
           <React.Suspense fallback={<LoadingSpinner />}>
             <Switch>
@@ -72,6 +76,18 @@ function App() {
               </Route>
               <Route path='/authenticate' exact>
                 <Authenticate />
+              </Route>
+              <Route path='/cart' exact>
+                <Cart />
+              </Route>
+              <Route path='/manage-product'>
+                <ManageProduct />
+              </Route>
+              <Route path='/products' exact>
+                <Products />
+              </Route>
+              <Route path='/view-product'>
+                <ViewProduct />
               </Route>
             </Switch>
           </React.Suspense>
