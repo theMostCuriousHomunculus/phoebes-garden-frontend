@@ -2,7 +2,9 @@ import React from 'react';
 import { BrowserRouter, Switch, Route } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import { makeStyles } from '@material-ui/core/styles';
+import { useDispatch } from 'react-redux';
 
+import * as actions from './redux/actions';
 import LoadingSpinner from './components/miscellaneous/LoadingSpinner';
 import Navigation from './components/Main Navigation/Navigation';
 import { AuthenticationContext } from './contexts/authentication-context';
@@ -23,6 +25,7 @@ const useStyles = makeStyles({
 
 function App() {
   const classes = useStyles();
+  const dispatch = useDispatch();
   const { sendRequest } = useRequest();
 
   const [token, setToken] = React.useState(null);
@@ -55,6 +58,10 @@ function App() {
       login(Cookies.get('admin_id'), Cookies.get('authentication_token'));
     }
   }, [login]);
+
+  React.useEffect(() => {
+    dispatch(actions.initializeStore());
+  }, [dispatch])
 
   return (
     <AuthenticationContext.Provider

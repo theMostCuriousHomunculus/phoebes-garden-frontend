@@ -7,8 +7,10 @@ import MUITableCell from '@material-ui/core/TableCell';
 import MUITableRow from '@material-ui/core/TableRow';
 import MUITextField from '@material-ui/core/TextField';
 import MUITypography from '@material-ui/core/Typography';
+import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 
+import * as actions from '../../redux/actions';
 import theme from '../../theme';
 
 const useStyles = makeStyles({
@@ -61,7 +63,8 @@ const useStyles = makeStyles({
 
 function CartTableRow (props) {
   const classes = useStyles();
-  const { availableQuantity, chosenQuantity, description, image, name, price, productId } = props.product;
+  const product = useSelector(state => state.cart.find(item => item.productId === props.productId));
+  const dispatch = useDispatch();
 
   return (
     <MUITableRow>
@@ -70,36 +73,36 @@ function CartTableRow (props) {
           <MUICard className={classes.card}>
             <MUICardMedia
               className={classes.cardMedia}
-              image={image}
-              title={name}
+              image={product.image}
+              title={product.name}
             />
           </MUICard>
-          <MUITypography variant="body1">{name}</MUITypography>
+          <MUITypography variant="body1">{product.name}</MUITypography>
         </div>
       </MUITableCell>
       <MUITableCell className={`${classes.tableCell} ${classes.textAlignRight}`}>
-        <MUITypography variant="body1">{description}</MUITypography>
+        <MUITypography variant="body1">{product.description}</MUITypography>
       </MUITableCell>
       <MUITableCell className={`${classes.tableCell} ${classes.textAlignCenter}`}>
-        <MUITypography variant="body1">${price}</MUITypography>
+        <MUITypography variant="body1">${product.price}</MUITypography>
       </MUITableCell>
       <MUITableCell className={classes.tableCell}>
         <div className={`${classes.flexRow} ${classes.spaceAround}`}>
           <div className={classes.flexRow}>
             <MUITextField
               className={classes.quantityInput}
-              inputProps={{ max: availableQuantity, min: 1, step: 1 }}
+              inputProps={{ max: product.availableQuantity, min: 1, step: 1 }}
               margin="dense"
-              onChange={(event) => props.changeChosenQuantity(event.target.value, productId)}
+              onChange={(event) => dispatch(actions.changeQuantity(props.productId, event.target.value))}
               type="number"
-              value={chosenQuantity}
+              value={product.chosenQuantity}
               variant="outlined"
             />
-            <MUITypography variant="body1"> / {availableQuantity}</MUITypography>
+            <MUITypography variant="body1"> / {product.availableQuantity}</MUITypography>
           </div>
           <MUIButton
             color="secondary"
-            onClick={props.removeProductFromCart.bind(this, productId)}
+            onClick={() => dispatch(actions.removeProduct(props.productId))}
             variant="contained"
           >
             <MUIDeleteForeverIcon />
@@ -107,7 +110,7 @@ function CartTableRow (props) {
         </div>
       </MUITableCell>
       <MUITableCell className={`${classes.tableCell} ${classes.textAlignCenter}`}>
-        <MUITypography variant="body1">${chosenQuantity * price}</MUITypography>
+        <MUITypography variant="body1">${product.chosenQuantity * product.price}</MUITypography>
       </MUITableCell>
     </MUITableRow>
   );
