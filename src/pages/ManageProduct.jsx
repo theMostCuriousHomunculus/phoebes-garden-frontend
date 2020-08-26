@@ -21,6 +21,25 @@ const useStyles = makeStyles({
   cardActions: {
     justifyContent: 'flex-end'
   },
+  imagePickerContainer: {
+    alignItems: 'center',
+    display: 'flex',
+    flexDirection: 'column'
+  },
+  imagePreviewContainer: {
+    alignItems: 'center',
+    border: '2px black solid',
+    display: 'flex',
+    height: 184,
+    justifyContent: 'center',
+    margin: 8,
+    width: 324
+  },
+  previewImage: {
+    height: 180,
+    objectFit: 'cover',
+    width: 320
+  },
   spaceBetween: {
     display: 'flex',
     justifyContent: 'space-between'
@@ -37,8 +56,10 @@ function ManageProduct () {
   const history = useHistory();
   const productId = qs.parse(window.location.search, { ignoreQueryPrefix: true }).productId;
   const [description, setDescription] = React.useState('');
-  const [image, setImage] = React.useState('');
+  const [image, setImage] = React.useState();
+  const imageInputRef = React.useRef();
   const [name, setName] = React.useState('');
+  const [previewURL, setPreviewURL] = React.useState();
   const [price, setPrice] = React.useState(0);
   const [quantity, setQuantity] = React.useState(0);
   const { loading, sendRequest } = useRequest();
@@ -48,7 +69,7 @@ function ManageProduct () {
       try {
         const productData = await sendRequest(`${process.env.REACT_APP_BACKEND_URL}/product/${productId}`, 'GET', null, {});
         setDescription(productData.description);
-        setImage(productData.image);
+        setPreviewURL(`${process.env.REACT_APP_BACKEND_URL}/${productData.image}`);
         setName(productData.name);
         setPrice(productData.price);
         setQuantity(productData.quantity);
@@ -60,6 +81,22 @@ function ManageProduct () {
       fetchProduct();
     }
   }, [productId, sendRequest]);
+
+  React.useEffect(() => {
+    if (image) {
+      const fileReader = new FileReader();
+      fileReader.onload = () => {
+        setPreviewURL(fileReader.result);
+      };
+      fileReader.readAsDataURL(image);
+    }
+  }, [image]);
+
+  function changeImageHandler (event) {
+    if (event.target.files && event.target.files.length === 1) {
+      setImage(event.target.files[0]);
+    }
+  }
 
   async function submitProduct () {
     const requestInfo = productId ?
@@ -73,19 +110,20 @@ function ManageProduct () {
       };
 
     try {
+      const formData = new FormData();
+      formData.append('description', description);
+      if (image) {
+        formData.append('image', image);
+      }
+      formData.append('name', name);
+      formData.append('price', price);
+      formData.append('quantity', quantity);
       await sendRequest(
         `${process.env.REACT_APP_BACKEND_URL}/product${requestInfo.urlSuffix}`,
         requestInfo.method,
-        JSON.stringify({
-          description,
-          image,
-          name,
-          price,
-          quantity
-        }),
+        formData,
         {
-          Authorization: 'Bearer ' + authentication.token,
-          'Content-Type': 'application/json'
+          Authorization: 'Bearer ' + authentication.token
         }
       );
       history.push('/products');
@@ -115,17 +153,29 @@ function ManageProduct () {
               value={name}
               variant="outlined"
             />
-            <MUITextField
-              className={classes.textField}
-              color="secondary"
-              fullWidth={true}
-              label="Image URL"
-              onChange={(event) => setImage(event.target.value)}
-              required={true}
-              type="text"
-              value={image}
-              variant="outlined"
-            />
+            <div className={classes.imagePickerContainer}>
+              <input
+                accept=".jpg,.png,.jpeg"
+                onChange={changeImageHandler}
+                ref={imageInputRef}
+                style={{ display: 'none' }}
+                type="file"
+              />
+              <MUIButton
+                color="secondary"
+                onClick={() => imageInputRef.current.click()}
+                style={{ marginTop: 4 }}
+                variant="contained"
+              >
+                Upload Image
+              </MUIButton>
+              <div className={classes.imagePreviewContainer}>
+                {previewURL ?
+                  <img alt="Preview" className={classes.previewImage} src={previewURL} /> :
+                  <MUITypography variant="body1">Please Pick an Image.</MUITypography>
+                }
+              </div>
+            </div>
             <MUITextField
               className={classes.textField}
               color="secondary"

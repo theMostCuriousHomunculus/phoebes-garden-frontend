@@ -91,7 +91,7 @@ function Navigation (props) {
           onClick={toggleDrawer(true)}
         />
         <div className={classes.headlineContainer}>
-          <MUITypography color="secondary" variant="h1">Joy's Flower Shop</MUITypography>
+          <MUITypography color="secondary" variant="h1">Phoebe's Garden</MUITypography>
         </div>
         <div className={classes.topBarContainer}>
           <NavLink

@@ -11,6 +11,7 @@ import MUITypography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 
 import LoadingSpinner from '../components/miscellaneous/LoadingSpinner';
+import theme from '../theme';
 import { AuthenticationContext } from '../contexts/authentication-context';
 import { useRequest } from '../hooks/request-hook';
 
@@ -25,6 +26,12 @@ const useStyles = makeStyles({
   gridContainer: {
     margin: 0,
     width: '100%'
+  },
+  warningButton: {
+    backgroundColor: theme.palette.warning.main,
+    '&:hover': {
+      backgroundColor: theme.palette.warning.dark
+    }
   }
 });
 
@@ -36,21 +43,41 @@ function Products () {
   const [productState, setProductState] = React.useState([]);
   const { loading, sendRequest } = useRequest();
 
-  React.useEffect(() => {
-    const fetchProducts = async function () {
+  const fetchProducts = React.useCallback(
+    async function () {
       try {
         const productData = await sendRequest(`${process.env.REACT_APP_BACKEND_URL}/product`, 'GET', null, {});
         setProductState(productData);
       } catch (error) {
         console.log(error);
       }
-    };
-    fetchProducts();
-  }, [sendRequest]);
+    },
+    [sendRequest]
+  );
 
+  React.useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts, sendRequest]);
+
+  // this needs updated to incorporate redux
   function addToCart (productId) {
     let currentQuantity = parseInt(localStorage.getItem(productId), 10);
     localStorage.setItem(productId, currentQuantity ? currentQuantity + 1 : 1);
+  }
+
+  async function deleteProductHandler (productId) {
+    try {
+      await sendRequest(`${process.env.REACT_APP_BACKEND_URL}/product/${productId}`,
+        'DELETE',
+        null,
+        {
+          Authorization: 'Bearer ' + authentication.token
+        }
+      );
+    } catch (error) {
+      console.log(error);
+    }
+    fetchProducts();
   }
 
   return (
@@ -69,7 +96,7 @@ function Products () {
                     />
                     <MUICardMedia
                       className={classes.cardMedia}
-                      image={product.image}
+                      image={`${process.env.REACT_APP_BACKEND_URL}/${product.image}`}
                       title={product.name}
                     />
                     <MUICardContent>
@@ -77,13 +104,22 @@ function Products () {
                     </MUICardContent>
                     <MUICardActions className={classes.cardActions}>
                       {authentication.isLoggedIn ?
-                        <MUIButton
-                          color="secondary"
-                          onClick={() => history.push(`/manage-product?productId=${product._id}`)}
-                          variant="contained"
-                        >
-                          Manage Product
-                        </MUIButton> :
+                        <React.Fragment>
+                          <MUIButton
+                            color="secondary"
+                            onClick={() => history.push(`/manage-product?productId=${product._id}`)}
+                            variant="contained"
+                          >
+                            Manage Product
+                          </MUIButton>
+                          <MUIButton
+                            className={classes.warningButton}
+                            onClick={deleteProductHandler.bind(this, product._id)}
+                            variant="contained"
+                          >
+                            Delete Product
+                          </MUIButton>
+                        </React.Fragment> :
                         <MUIButton
                           color="secondary"
                           onClick={addToCart.bind(this, product._id)}

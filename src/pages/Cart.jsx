@@ -110,9 +110,9 @@ function Cart () {
                     </MUITableCell>
                     <MUITableCell className={classes.textAlignCenter}>
                       <MUITypography variant="body1">
-                        ${cart.reduce(function (a, c) {
+                        ${Math.round(cart.reduce(function (a, c) {
                           return a + c.chosenQuantity * c.price;
-                        }, 0)}
+                        }, 0) * 100) / 100}
                       </MUITypography>
                     </MUITableCell>
                   </MUITableRow>

@@ -1,9 +1,11 @@
 import React from 'react';
 import MUIButton from '@material-ui/core/Button';
+import MUICircularProgress from '@material-ui/core/CircularProgress';
 import MUIFormControlLabel from '@material-ui/core/FormControlLabel';
 import MUIGrid from '@material-ui/core/Grid';
 import MUISwitch from '@material-ui/core/Switch';
 import MUITextField from '@material-ui/core/TextField';
+import MUITypography from '@material-ui/core/Typography';
 import { loadStripe } from '@stripe/stripe-js';
 import {
   CardElement,
@@ -11,8 +13,9 @@ import {
   useElements,
   useStripe
 } from '@stripe/react-stripe-js';
+import { useSelector } from 'react-redux';
 
-// import { useRequest } from '../../hooks/request-hook';
+import { useRequest } from '../../hooks/request-hook';
 
 // Custom styling can be passed to options when creating an Element.
 const CARD_ELEMENT_OPTIONS = {
@@ -35,15 +38,16 @@ const CARD_ELEMENT_OPTIONS = {
 };
 
 const CheckoutForm = () => {
-  // const [succeeded, setSucceeded] = React.useState(false);
+  const cart = useSelector(state => state.cart);
+  const [succeeded, setSucceeded] = React.useState(false);
   const [error, setError] = React.useState(null);
-  // const [processing, setProcessing] = React.useState('');
-  // const [disabled, setDisabled] = React.useState(true);
-  // const [clientSecret, setClientSecret] = React.useState('');
+  const [processing, setProcessing] = React.useState(false);
+  const [disabled, setDisabled] = React.useState(false);
+  const [clientSecret, setClientSecret] = React.useState('');
   const stripe = useStripe();
   const elements = useElements();
 
-  // const { sendRequest } = useRequest();
+  const { sendRequest } = useRequest();
   const [pickup, setPickup] = React.useState(true);
   const cityInput = React.useRef(null);
   const emailAddressInput = React.useRef(null);
@@ -55,60 +59,87 @@ const CheckoutForm = () => {
   const streetAddressInput = React.useRef(null);
   const zipInput = React.useRef(null);
 
-  // React.useEffect(() => {
-  //   // Create PaymentIntent as soon as the page loads
-  //   async function createPaymentIntent () {
-  //     try {
-  //       const responseData = await sendRequest(`${process.env.REACT_APP_BACKEDN_URL}/order`,
-  //         'POST',
-  //         {
-
-  //         },
-  //         {
-  //           "Content-Type": "application/json"
-  //         }
-  //       );
-  //     } catch (err) {
-  //       console.log(err);
-  //     }
-  //   }/create-payment-intent", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json"
-  //       },
-  //       body: JSON.stringify({items: [{ id: "xl-tshirt" }]})
-  //     })
-  //     .then(res => {
-  //       return res.json();
-  //     })
-  //     .then(data => {
-  //       setClientSecret(data.clientSecret);
-  //     });
-  // }, []);
+  React.useEffect(() => {
+    // Create PaymentIntent as soon as the page loads
+    async function createPaymentIntent () {
+      try {
+        const responseData = await sendRequest(`${process.env.REACT_APP_BACKEND_URL}/order/create-payment-intent`,
+          'POST',
+          JSON.stringify({ items: cart.map(x => ({ _id: x.productId, quantity: x.chosenQuantity }))}),
+          {
+            "Content-Type": "application/json"
+          }
+        );
+        setClientSecret(responseData.clientSecret);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+    createPaymentIntent();
+  }, [cart, sendRequest]);
 
   // Handle real-time validation errors from the card Element.
-  const handleChange = (event) => {
-    if (event.error) {
-      setError(event.error.message);
-    } else {
-      setError(null);
-    }
-  }
+  // const handleChange = (event) => {
+  //   if (event.error) {
+  //     setError(event.error.message);
+  //   } else {
+  //     setError(null);
+  //   }
+  // }
+
+  const handleChange = async (event) => {
+    // Listen for changes in the CardElement
+    // and display any errors as the customer types their card details
+    setDisabled(event.empty);
+    setError(event.error ? event.error.message : "");
+  };
 
   // Handle form submission.
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const card = elements.getElement(CardElement);
-    const result = await stripe.createToken(card);
-    if (result.error) {
-      // Inform the user if there was an error.
-      setError(result.error.message);
+    setProcessing(true);
+
+    const payload = await stripe.confirmCardPayment(clientSecret, {
+      payment_method: {
+        billing_details: {
+          address: {
+            city: cityInput.current.value,
+            country: 'US',
+            line1: streetAddressInput.current.value,
+            line2: null,
+            postal_code: zipInput.current.value,
+            state: stateInput.current.value
+          },
+          email: emailAddressInput.current.value,
+          name: `${firstNameInput.current.value} ${lastNameInput.current.value}`,
+          phone: phoneNumberInput.current.value
+        },
+        card: elements.getElement(CardElement)
+      },
+      receipt_email: emailAddressInput.current.value
+    });
+
+    if (payload.error) {
+      setError(`Payment failed ${payload.error.message}`);
+      setProcessing(false);
     } else {
       setError(null);
-      // Send the token to your server.
-      stripeTokenHandler(result.token);
+      setProcessing(false);
+      setSucceeded(true);
     }
   };
+
+    // const card = elements.getElement(CardElement);
+    // const result = await stripe.createToken(card);
+    // if (result.error) {
+    //   // Inform the user if there was an error.
+    //   setError(result.error.message);
+    // } else {
+    //   setError(null);
+    //   // Send the token to your server.
+    //   stripeTokenHandler(result.token);
+    // }
+  // };
 
   return (
     <form onSubmit={handleSubmit} style={{ width: '100%' }}>
@@ -231,7 +262,7 @@ const CheckoutForm = () => {
               <MUISwitch
                 checked={!pickup}
                 onChange={() => setPickup(currentState => !currentState)}
-                name={pickup}
+                name="method"
               />
             }
             label={pickup ? 'Pickup' : 'Delivery'}
@@ -245,22 +276,23 @@ const CheckoutForm = () => {
           options={CARD_ELEMENT_OPTIONS}
           onChange={handleChange}
         />
-        <div className="card-errors" role="alert">{error}</div>
+        {error && <MUITypography color="error" variant="body1">{error}</MUITypography>}
       </div>
       <MUIButton
         color="secondary"
+        disabled={processing || disabled || succeeded}
         style={{ float: 'right', marginTop: 8 }}
         type="submit"
         variant="contained"
       >
-        Submit Payment Via Stripe
+        {processing ? <MUICircularProgress color="primary" size={24} /> : 'Submit Payment Via Stripe'}
       </MUIButton>
     </form>
   );
 }
 
 // Setup Stripe.js and the Elements provider
-const stripePromise = loadStripe(`${process.env.STRIPE_TEST_PUBLISHABLE_KEY}`);
+const stripePromise = loadStripe(`${process.env.REACT_APP_STRIPE_TEST_PUBLISHABLE_KEY}`);
 
 export default () => {
   return (
@@ -271,14 +303,14 @@ export default () => {
 }
 
 // POST the token ID to your backend.
-async function stripeTokenHandler(token) {
-  const response = await fetch('/charge', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({token: token.id})
-  });
+// async function stripeTokenHandler(token) {
+//   const response = await fetch('/charge', {
+//     method: 'POST',
+//     headers: {
+//       'Content-Type': 'application/json'
+//     },
+//     body: JSON.stringify({token: token.id})
+//   });
 
-  return response.json();
-}
+//   return response.json();
+// }
