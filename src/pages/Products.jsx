@@ -9,7 +9,9 @@ import MUICardMedia from '@material-ui/core/CardMedia';
 import MUIGrid from '@material-ui/core/Grid';
 import MUITypography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
+import { useDispatch } from 'react-redux';
 
+import * as actions from '../redux/actions';
 import LoadingSpinner from '../components/miscellaneous/LoadingSpinner';
 import theme from '../theme';
 import { AuthenticationContext } from '../contexts/authentication-context';
@@ -39,6 +41,7 @@ function Products () {
 
   const authentication = React.useContext(AuthenticationContext);
   const classes = useStyles();
+  const dispatch = useDispatch();
   const history = useHistory();
   const [productState, setProductState] = React.useState([]);
   const { loading, sendRequest } = useRequest();
@@ -63,6 +66,7 @@ function Products () {
   function addToCart (productId) {
     let currentQuantity = parseInt(localStorage.getItem(productId), 10);
     localStorage.setItem(productId, currentQuantity ? currentQuantity + 1 : 1);
+    dispatch(actions.initializeStore());
   }
 
   async function deleteProductHandler (productId) {

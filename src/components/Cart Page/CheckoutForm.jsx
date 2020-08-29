@@ -13,8 +13,11 @@ import {
   useElements,
   useStripe
 } from '@stripe/react-stripe-js';
+import { useDispatch } from 'react-redux';
+import { useHistory } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
+import * as actions from '../../redux/actions';
 import { useRequest } from '../../hooks/request-hook';
 
 // Custom styling can be passed to options when creating an Element.
@@ -44,6 +47,8 @@ const CheckoutForm = () => {
   const [processing, setProcessing] = React.useState(false);
   const [disabled, setDisabled] = React.useState(false);
   const [clientSecret, setClientSecret] = React.useState('');
+  const dispatch = useDispatch();
+  const history = useHistory();
   const stripe = useStripe();
   const elements = useElements();
 
@@ -77,15 +82,6 @@ const CheckoutForm = () => {
     }
     createPaymentIntent();
   }, [cart, sendRequest]);
-
-  // Handle real-time validation errors from the card Element.
-  // const handleChange = (event) => {
-  //   if (event.error) {
-  //     setError(event.error.message);
-  //   } else {
-  //     setError(null);
-  //   }
-  // }
 
   const handleChange = async (event) => {
     // Listen for changes in the CardElement
@@ -126,20 +122,13 @@ const CheckoutForm = () => {
       setError(null);
       setProcessing(false);
       setSucceeded(true);
+      setTimeout(function () {
+        localStorage.clear();
+        dispatch(actions.initializeStore());
+        history.push('/');
+      }, 3000);
     }
   };
-
-    // const card = elements.getElement(CardElement);
-    // const result = await stripe.createToken(card);
-    // if (result.error) {
-    //   // Inform the user if there was an error.
-    //   setError(result.error.message);
-    // } else {
-    //   setError(null);
-    //   // Send the token to your server.
-    //   stripeTokenHandler(result.token);
-    // }
-  // };
 
   return (
     <form onSubmit={handleSubmit} style={{ width: '100%' }}>
@@ -277,6 +266,7 @@ const CheckoutForm = () => {
           onChange={handleChange}
         />
         {error && <MUITypography color="error" variant="body1">{error}</MUITypography>}
+        {succeeded && <MUITypography color="secondary" variant="body1">Payment was successful; thank you for your business!</MUITypography>}
       </div>
       <MUIButton
         color="secondary"
