@@ -70,7 +70,7 @@ const CheckoutForm = () => {
       try {
         const responseData = await sendRequest(`${process.env.REACT_APP_BACKEND_URL}/order/create-payment-intent`,
           'POST',
-          JSON.stringify({ items: cart.map(x => ({ _id: x.productId, quantity: x.chosenQuantity }))}),
+          JSON.stringify({ items: cart.map(x => ({ _id: x.productId, quantity: parseInt(x.chosenQuantity) }))}),
           {
             "Content-Type": "application/json"
           }
