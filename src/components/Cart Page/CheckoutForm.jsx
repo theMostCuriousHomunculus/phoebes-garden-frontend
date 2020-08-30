@@ -282,7 +282,7 @@ const CheckoutForm = () => {
 }
 
 // Setup Stripe.js and the Elements provider
-const stripePromise = loadStripe(`${process.env.REACT_APP_STRIPE_TEST_PUBLISHABLE_KEY}`);
+const stripePromise = loadStripe(`${process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY}`);
 
 export default () => {
   return (
