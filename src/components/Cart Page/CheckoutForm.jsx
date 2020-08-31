@@ -97,20 +97,19 @@ const CheckoutForm = () => {
 
     const payload = await stripe.confirmCardPayment(clientSecret, {
       payment_method: {
-        billing_details: {
-          address: {
-            city: cityInput.current.value,
-            country: 'US',
-            line1: streetAddressInput.current.value,
-            line2: null,
-            postal_code: zipInput.current.value,
-            state: stateInput.current.value
-          },
-          email: emailAddressInput.current.value,
-          name: `${firstNameInput.current.value} ${lastNameInput.current.value}`,
-          phone: phoneNumberInput.current.value
-        },
         card: elements.getElement(CardElement)
+      },
+      shipping: {
+        address: {
+          city: cityInput.current.value,
+          country: 'US',
+          line1: streetAddressInput.current.value,
+          line2: null,
+          postal_code: zipInput.current.value,
+          state: stateInput.current.value
+        },
+        name: `${firstNameInput.current.value} ${lastNameInput.current.value}`,
+        phone: phoneNumberInput.current.value
       },
       receipt_email: emailAddressInput.current.value
     });
