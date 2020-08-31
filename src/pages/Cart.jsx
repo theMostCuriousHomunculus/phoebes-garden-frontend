@@ -9,8 +9,9 @@ import MUITableFooter from '@material-ui/core/TableFooter';
 import MUITableHead from '@material-ui/core/TableHead';
 import MUITableRow from '@material-ui/core/TableRow';
 import MUITypography from '@material-ui/core/Typography';
-import { useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
+import { useSelector } from 'react-redux';
 
 import CartTableRow from '../components/Cart Page/CartTableRow';
 import CheckoutForm from '../components/Cart Page/CheckoutForm';
@@ -89,14 +90,27 @@ function Cart () {
                   </MUITableRow>
                 </MUITableHead>
                 <MUITableBody className={classes.tableBody}>
-                  {cart.map(function (product) {
-                    return (
-                      <CartTableRow
-                        key={product.productId}
-                        productId={product.productId}
-                      />
-                    );
-                  })}
+                  {cart.length > 0 ?
+                    cart.map(function (product) {
+                      return (
+                        <CartTableRow
+                          key={product.productId}
+                          productId={product.productId}
+                        />
+                      );
+                    }) :
+                    <MUITableRow>
+                      <MUITableCell>
+                        <MUITypography variant="body1">
+                          No items in your cart yet; check out our <Link style={{ color: 'blue' }} to='/products'>inventory</Link>!
+                        </MUITypography>
+                      </MUITableCell>
+                      <MUITableCell></MUITableCell>
+                      <MUITableCell></MUITableCell>
+                      <MUITableCell></MUITableCell>
+                      <MUITableCell></MUITableCell>
+                    </MUITableRow>
+                  }
                 </MUITableBody>
                 <MUITableFooter>
                   <MUITableRow>

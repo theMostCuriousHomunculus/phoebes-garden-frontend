@@ -139,6 +139,7 @@ const CheckoutForm = () => {
             inputRef={firstNameInput}
             label="First Name"
             name="first_name"
+            required={true}
             type="text"
             variant="outlined"
           />
@@ -150,6 +151,7 @@ const CheckoutForm = () => {
             inputRef={lastNameInput}
             label="Last Name"
             name="last_name"
+            required={true}
             type="text"
             variant="outlined"
           />
@@ -269,7 +271,7 @@ const CheckoutForm = () => {
       </div>
       <MUIButton
         color="secondary"
-        disabled={processing || disabled || succeeded}
+        disabled={processing || disabled || succeeded || cart.length === 0}
         style={{ float: 'right', marginTop: 8 }}
         type="submit"
         variant="contained"

@@ -96,7 +96,12 @@ function Products () {
                   <MUICard>
                     <MUICardHeader
                       title={<MUITypography color="secondary" variant="h2">{product.name}</MUITypography>}
-                      subheader={<MUITypography variant="subtitle1">${product.price}</MUITypography>}
+                      subheader={
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <MUITypography variant="subtitle1">${product.price}</MUITypography>
+                          <MUITypography variant="subtitle1">{product.quantity} in stock</MUITypography>
+                        </div>
+                      }
                     />
                     <MUICardMedia
                       className={classes.cardMedia}
@@ -126,10 +131,14 @@ function Products () {
                         </React.Fragment> :
                         <MUIButton
                           color="secondary"
+                          disabled={product.quantity === 0}
                           onClick={addToCart.bind(this, product._id)}
                           variant="contained"
                         >
-                          Add to Cart
+                          {product.quantity === 0 ?
+                            'Out of Stock :-(' :
+                            'Add to Cart'
+                          }
                         </MUIButton>
                       }
                     </MUICardActions>

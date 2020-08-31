@@ -5,6 +5,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { useDispatch } from 'react-redux';
 
 import * as actions from './redux/actions';
+import Footer from './components/miscellaneous/Footer';
 import LoadingSpinner from './components/miscellaneous/LoadingSpinner';
 import Navigation from './components/Main Navigation/Navigation';
 import { AuthenticationContext } from './contexts/authentication-context';
@@ -19,6 +20,7 @@ const ViewProduct = React.lazy(() => import('./pages/ViewProduct'));
 
 const useStyles = makeStyles({
   main: {
+    paddingBottom: 75,
     margin: '8 auto 0 auto'
   }
 });
@@ -99,7 +101,7 @@ function App() {
             </Switch>
           </React.Suspense>
         </main>
-        {/*<Footer />*/}
+        <Footer />
       </BrowserRouter>
     </AuthenticationContext.Provider>
   );
