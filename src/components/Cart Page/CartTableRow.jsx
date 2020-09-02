@@ -73,7 +73,7 @@ function CartTableRow (props) {
           <MUICard className={classes.card}>
             <MUICardMedia
               className={classes.cardMedia}
-              image={`${process.env.REACT_APP_BACKEND_URL}/${product.image}`}
+              image={product.image}
               title={product.name}
             />
           </MUICard>
