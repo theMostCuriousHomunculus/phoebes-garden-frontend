@@ -105,7 +105,7 @@ function Products () {
                     />
                     <MUICardMedia
                       className={classes.cardMedia}
-                      image={`${process.env.REACT_APP_BACKEND_URL}/${product.image}`}
+                      image={product.image}
                       title={product.name}
                     />
                     <MUICardContent>

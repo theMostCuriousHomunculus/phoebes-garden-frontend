@@ -69,7 +69,7 @@ function ManageProduct () {
       try {
         const productData = await sendRequest(`${process.env.REACT_APP_BACKEND_URL}/product/${productId}`, 'GET', null, {});
         setDescription(productData.description);
-        setPreviewURL(`${process.env.REACT_APP_BACKEND_URL}/${productData.image}`);
+        setPreviewURL(productData.image);
         setName(productData.name);
         setPrice(productData.price);
         setQuantity(productData.quantity);
