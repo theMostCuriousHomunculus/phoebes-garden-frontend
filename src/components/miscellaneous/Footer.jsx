@@ -8,13 +8,11 @@ const useStyles = makeStyles({
   footer: {
     alignItems: 'center',
     background: theme.palette.secondary.main,
-    bottom: 0,
     color: theme.palette.primary.main,
     display: 'flex',
     flexDirection: 'column',
-    height: 75,
     justifyContent: 'center',
-    position: 'absolute',
+    textAlign: 'center',
     width: '100%',
     zIndex: -1,
     '& a': {
