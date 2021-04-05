@@ -20,8 +20,12 @@ const ViewProduct = React.lazy(() => import('./pages/ViewProduct'));
 
 const useStyles = makeStyles({
   main: {
-    paddingBottom: 75,
-    margin: '8 auto 0 auto'
+    display: 'flex',
+    flex: '1 0 auto',
+    flexDirection: 'column',
+    height: '100%',
+    margin: 'auto',
+    width: '100%'
   }
 });
 
