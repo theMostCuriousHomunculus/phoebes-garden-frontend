@@ -11,6 +11,7 @@ const useStyles = makeStyles({
     color: theme.palette.primary.main,
     display: 'flex',
     flexDirection: 'column',
+    flexShrink: 0,
     justifyContent: 'center',
     textAlign: 'center',
     width: '100%',
