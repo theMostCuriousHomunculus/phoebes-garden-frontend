@@ -15,7 +15,6 @@ const useStyles = makeStyles({
     justifyContent: 'center',
     textAlign: 'center',
     width: '100%',
-    zIndex: -1,
     '& a': {
       color: '#ffffff'
     }
